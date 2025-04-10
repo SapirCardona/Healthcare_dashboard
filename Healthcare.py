@@ -4,6 +4,49 @@ import plotly.express as px
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 
+st.set_page_config(page_title="Mental Health in Tech - Interactive Dashboard", layout="wide")
+
+st.markdown("""
+    <style>
+    html {
+    background-color: #e3f2fd !important;
+    color-scheme: light !important;
+    color: #102027 !important;
+    }
+    .stSidebar, .css-1avcm0n, .css-1d391kg {
+        background-color: #739dbf !important;
+    }
+    h1, h2, h3, .stSubheader {
+        color: #1565c0 !important;
+    }
+    .stMetric label {
+        font-weight: bold;
+        font-size: 16px;
+        color: #102027 !important;
+    }
+    .stMetric span {
+        font-weight: bold;
+        font-size: 26px;
+        color: #1e88e5 !important;
+    }
+    .stMarkdown, .markdown-text-container, .stExpanderHeader {
+        color: #102027 !important;
+        font-size: 16px;
+    }
+    .stTabs [role="tab"] {
+        background-color: #90caf9;
+        color: #1565c0;
+        padding: 10px;
+        border-radius: 5px;
+        margin-right: 10px;
+    }
+    .stTabs [aria-selected="true"] {
+        background-color: #64b5f6;
+        font-weight: bold;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
 st.title("Mental Health in Tech - Interactive Dashboard")
 px.defaults.template = "seaborn"
 
@@ -72,21 +115,20 @@ else:
         with col3:
             st.metric("Avg. Age", f"{filtered_df['Age'].mean():.1f}")
 
-        color_discrete_map = {"Yes": "#66C2A5", "No": "#FC8D62"}
-
+        color_discrete_map = {"Yes": "#8fcbbc", "No": "#d98880"}
 
         def show_plotly_chart(title, fig):
             st.subheader(title)
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, use_container_width=False, height=250)
 
-
-        fig1 = px.histogram(filtered_df, x="Gender", color="treatment", barmode="group", title="Treatment by Gender")
+        fig1 = px.histogram(filtered_df, x="Gender", color="treatment", barmode="group",
+                            title="Treatment by Gender", color_discrete_map=color_discrete_map)
         show_plotly_chart("Treatment by Gender", fig1)
 
-        fig2 = px.histogram(filtered_df, x="Age", nbins=15, title="Age Distribution")
+        fig2 = px.histogram(filtered_df, x="Age", nbins=15, title="Age Distribution",
+                            color_discrete_sequence=["#d2b48c"])
         show_plotly_chart("Age Distribution", fig2)
 
-        # 🔄 Self-Employment Pie Chart
         self_employed_counts = filtered_df["self_employed"].value_counts().reset_index()
         self_employed_counts.columns = ["self_employed", "count"]
 
@@ -95,17 +137,18 @@ else:
             names="self_employed",
             values="count",
             title="Self-Employment Status",
-            hole=0.4  # אם את רוצה שזה יהיה גם כמו דונאט
+            hole=0.4,
+            color_discrete_map=color_discrete_map
         )
         fig3.update_traces(textinfo="percent+label")
-
         show_plotly_chart("Self-Employment Status", fig3)
 
         fig4 = px.histogram(
             filtered_df,
             x="work_interfere",
             category_orders={"work_interfere": ["Never", "Rarely", "Sometimes", "Often"]},
-            title="Work Interference"
+            title="Work Interference",
+            color_discrete_sequence=["#b2a88d"]
         )
         show_plotly_chart("Work Interference", fig4)
 
@@ -113,15 +156,23 @@ else:
         fig5 = px.imshow(
             heat_df,
             text_auto=True,
-            color_continuous_scale='Blues',
+            color_continuous_scale='Earth',
             title="Relationship between Family History and Seeking Treatment"
         )
         show_plotly_chart("Family History vs Treatment", fig5)
 
-        fig6 = px.histogram(filtered_df, x="benefits", title="Mental Health Benefits at Work")
+        fig6 = px.histogram(filtered_df, x="benefits", title="Mental Health Benefits at Work",
+                            color_discrete_sequence=["#c5e2d5"])
         show_plotly_chart("Mental Health Benefits at Work", fig6)
 
-        fig7 = px.histogram(filtered_df, x="no_employees", title="Company Size Distribution")
+        company_order = ["5-25", "26-100", "100-500", "500-1000", "More than 1000"]
+        fig7 = px.histogram(
+            filtered_df,
+            x="no_employees",
+            title="Company Size Distribution",
+            category_orders={"no_employees": company_order},
+            color_discrete_sequence=["#f2cfa0"]
+        )
         show_plotly_chart("Company Size Distribution", fig7)
 
     with tab2:
